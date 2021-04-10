@@ -22,7 +22,7 @@ def get_stream(video, audioOnly):
         return audio_streams[1]
     else:
         video_streams = video.streams.filter(progressive=True).order_by('resolution').desc()
-        return video_streams[1]
+        return video_streams[0]
 
 def rename_file(path, old_name, new_name, extension):
     number = 0
@@ -48,6 +48,7 @@ def download_video(data):
     except:
         print("Something gone wrong with the video url, check if it still exist")
         exit()
+    
     stream = get_stream(video, data['audioOnly'])
     output_file = stream.download(output_path = data['path'], filename="temp")
     sufix = '.mp4'
@@ -84,7 +85,7 @@ def dowload_playlist(data):
 
 def main():
     args = create_parser()
-    data = {'path':os.path.abspath(args.path)+'/', 'url':args.url,'isPlaylist':args.playlist,'audioOnly':args.audio}
+    data = {'path':os.path.abspath(args.path)+os.path.sep, 'url':args.url,'isPlaylist':args.playlist,'audioOnly':args.audio}
  
     if(args.playlist):
         dowload_playlist(data)
