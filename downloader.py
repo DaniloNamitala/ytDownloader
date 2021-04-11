@@ -84,7 +84,7 @@ def dowload_playlist(data):
         print(f"Downloading {count} of {len(playlist.video_urls)}")
         bar = '[' + 20 * ' ' +']'
         print(f'{bar} 0.00%', end='\r')
-        download_video(data['url'], data['path'], data['audioOnly'])
+        download_video(video, data['path'], data['audioOnly'])
     print("Successfully Completed")
 
 #main funcion
