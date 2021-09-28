@@ -2,6 +2,7 @@
 
 from pytube import YouTube
 from pytube import Playlist
+from pytube import request 
 from pathlib import Path
 import os
 import sys
@@ -28,57 +29,37 @@ def get_stream(video, audioOnly):
         video_streams = video.streams.filter(progressive=True).order_by('resolution').desc()
         return video_streams[0]
 
-#Each file is saved with the name 'temp' to make sure it will not replace a existing file
-#so this function rename the file to video title appending a number if the file name already exists
-def rename_file(path, old_name, new_name, extension):
-    number = 0
-    new_name = new_name.replace('/','')
-    name = new_name+extension
-    while(os.path.isfile(path+name)):
-        number += 1
-        name = new_name + '(' + str(number) + ')'+extension
-    os.rename(old_name, path+name)
-
 def print_progress_bar(blocks_number, conclued, total):
     decimal_percent = conclued/total
     blocks = math.floor(decimal_percent*blocks_number)
     bar = '[' + blocks * chr(9608)+ (blocks_number-blocks)*' '+']'
     print(f'{bar} {decimal_percent* 100:.2f}%', end='\r')
 
-#Update the progress bar and the percent  progress of the download
-def on_progress(stream, chunk=None,bytes_remaining=None):
-    print_progress_bar(20, stream.filesize-bytes_remaining, stream.filesize)
-
 #Create the video object and download it
-def download_video(url, path, audioOnly,progress = None):
-    try:
-        video = YouTube(url, on_progress_callback=progress)
-    except VideoUnavailable:
-        print(f"o video {url} esta indisponivel")
-    except:
-        print("Something gone wrong with the video url, check if it still exist")
-        return False
-    else:
-        try:
-            stream = get_stream(video, audioOnly)
-        except:
-            print("Something gone wrong with the video url, check if it still exist")
-            return False
-        else:
-            output_file = stream.download(output_path=path, filename='_'+video.title)
-
-            sufix = '.mp4'
-            if(audioOnly):
-                sufix = '.mp3'
-            rename_file(path,output_file, video.title,sufix)
+def download_video(url, path, audioOnly, progress):
+        video = YouTube(url)
+        stream = get_stream(video, audioOnly)
+        sufix = "mp4"
+        if audioOnly:
+            sufix = "mp3"
+        with open(f"{path}{video.title}.{sufix}", "wb") as file:
+            downloaded = 0
+            filesize = stream.filesize
+            stream = request.stream(stream.url)
+            chunk = next(stream,None)
+            while chunk:
+                file.write(chunk)
+                downloaded += len(chunk)
+                chunk = next(stream,None)
+                if progress:
+                    progress(30, downloaded, filesize)
 
 #Call video_download for one video
 def download_single(data):
     print(f"Downloading 1 video")
-    print_progress_bar(20,0,10)
-    
-    if(download_video(data['url'], data['path'], data['audioOnly'], on_progress)):
-        print("\nSuccessfully Completed")
+    print_progress_bar(30,0,30)
+    download_video(data['url'], data['path'], data['audioOnly'], print_progress_bar)
+    print("\nSuccessfully Completed")
 
 #Create a playlist object and call download_video for each video
 def dowload_playlist(data,threads_number):
@@ -93,7 +74,7 @@ def dowload_playlist(data,threads_number):
     futures = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=threads_number) as executor:
         for video in playlist.video_urls:
-            futures.append(executor.submit(download_video, url=video, path=data['path'], audioOnly=data['audioOnly']))
+            futures.append(executor.submit(download_video, url=video, path=data['path'], audioOnly=data['audioOnly'], progress=None))
         
         for future in concurrent.futures.as_completed(futures):
             count+=1
@@ -105,6 +86,10 @@ def dowload_playlist(data,threads_number):
 def main():
     args = create_parser()
     data = {'path':os.path.abspath(args.path)+os.path.sep, 'url':args.url,'isPlaylist':args.playlist,'audioOnly':args.audio}
+    
+    if not os.path.exists(data["path"]): #create path
+        os.makedirs(data["path"])
+
     if(args.playlist):
         dowload_playlist(data,args.multithreading)
     else:   
