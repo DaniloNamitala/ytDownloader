@@ -31,7 +31,7 @@ With python installed run the help command to get the instructions:
 
 the result will be: 
 
-	usage: downloader.py [-h] [-p] [-a] url path
+	usage: downloader.py [-h] [-p] [-a] [-mt MULTITHREADING] url path
 
 	positional arguments:
 	  url             Video or playlsit url
@@ -41,12 +41,15 @@ the result will be:
 	  -h, --help      show this help message and exit
 	  -p, --playlist  Especify if the url is a playlist
 	  -a, --audio     Download only the audio
+	  -mt MULTITHREADING, --multithreading MULTITHREADING 
+	  			Number of threads for downloading
+
 
 ## Exemples
 - Downloading a single video in mp4 format:
 	
 		$ python3  ./dowloader.py https://www.youtube.com/watch?v=YOq2afxPJkM ./myfolder/ 
 
-- Downloading a music playlist in mp3 format:
+- Downloading a music playlist in mp3 format with 5 downloads at the same time:
 	
-		$ python3  ./dowloader.py -pa https://www.youtube.com/playlist?list=PL5XvdXjPkManLzT0fUXTXWVfdLxGrLYCr ./myfolder/ 
+		$ python3  ./dowloader.py -pa -mt 5 https://www.youtube.com/playlist?list=PL5XvdXjPkManLzT0fUXTXWVfdLxGrLYCr ./myfolder/ 
