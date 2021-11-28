@@ -42,7 +42,8 @@ def download_video(url, path, audioOnly, progress):
         sufix = "mp4"
         if audioOnly:
             sufix = "mp3"
-        with open(f"{path}{video.title}.{sufix}", "wb") as file:
+        title = video.title.replace("/","-")
+        with open(f"{path}{title}.{sufix}", "wb") as file:
             downloaded = 0
             filesize = stream.filesize
             stream = request.stream(stream.url)
