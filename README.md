@@ -27,11 +27,11 @@ and try the second command again.
 ## Usage
 With python installed run the help command to get the instructions:
 
-	$ python3 ./downloader.py -h
+	$ python3 ./VideoDownloader.py -h
 
 the result will be: 
 
-	usage: downloader.py [-h] [-p] [-a] [-mt MULTITHREADING] url path
+	usage: VideoDownloader.py [-h] [-p] [-a] [-mt MULTITHREADING] url path
 
 	positional arguments:
 	  url             Video or playlsit url
@@ -48,8 +48,8 @@ the result will be:
 ## Exemples
 - Downloading a single video in mp4 format:
 	
-		$ python3  ./dowloader.py https://www.youtube.com/watch?v=YOq2afxPJkM ./myfolder/ 
+		$ python3  ./VideoDownloader.py https://www.youtube.com/watch?v=YOq2afxPJkM ./myfolder/ 
 
 - Downloading a music playlist in mp3 format with 5 downloads at the same time:
 	
-		$ python3  ./dowloader.py -pa -mt 5 https://www.youtube.com/playlist?list=PL5XvdXjPkManLzT0fUXTXWVfdLxGrLYCr ./myfolder/ 
+		$ python3  ./VideoDownloader.py -pa -mt 5 https://www.youtube.com/playlist?list=PL5XvdXjPkManLzT0fUXTXWVfdLxGrLYCr ./myfolder/ 
