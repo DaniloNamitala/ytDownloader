@@ -2,14 +2,7 @@ from pytube import YouTube
 from moviepy.editor import *
 from pytube import request
 from pytube import Stream
-from enum import Enum
-
-class State(Enum):
-    WAITING = 0
-    DOWNLOADING = 1
-    PAUSED = 2
-    CONVERTING = 3
-    DONE = 4
+from Constants import *
 
 class Video:
     def __init__(self, url, audioOnly = False) -> None:
@@ -45,23 +38,28 @@ class Video:
             self._stream = video_streams[0]
         return self._stream
 
-    def download(self, path, progress = None):
+    def download(self, path, progress = lambda d, fz: None):
         self._update_state(State.DOWNLOADING)
         stream = self._get_stream()
         with open(f"{path}{self._tempfilename}", "wb") as file:
             downloaded = 0
             filesize = stream.filesize
-            if progress: progress(downloaded, filesize)
+            progress(downloaded, filesize)
             stream = request.stream(stream.url)
             chunk = next(stream,None)
             while chunk:
                 file.write(chunk)
                 downloaded += len(chunk)
+                progress(downloaded, filesize)
+                print(self._state)
+                if self._state == State.STOP: break
+                while self._state == State.PAUSED: pass
                 chunk = next(stream,None)
-                if progress: progress(downloaded, filesize)
-                while self._state != State.DOWNLOADING: pass
-            if(progress): 
-                print(end="\n")
+        if(self._state == State.STOP):
+            os.remove(f"{path}{self._tempfilename}")
+            self._update_state(State.WAITING)
+            return
+        print(end="\n")
         if self._audioOnly:
             self._convert(path)
 
